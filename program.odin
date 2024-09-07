@@ -1,93 +1,93 @@
 package main
 
 import "core:fmt"
-import rl "vendor:raylib"
-import b2 "vendor:box2d"
 import "core:math"
 import "core:slice"
+import rl "vendor:raylib"
+import b2 "vendor:box2d"
+
+
+targetFps:i32: 144
+windowSize:vector2: {800,600}
+entitySize:vector2: {40,60}
+
+// getMiddle :: proc() -> vector2{
+//     return {windowSize.x/2, windowSize.y/2}
+// }
 
 main :: proc() {
 	fmt.println("Hellope!")
-    gameLoop()
+    rl.InitWindow(auto_cast(windowSize.x), auto_cast(windowSize.y), "odin test")
+    rl.SetTargetFPS(targetFps)
+    // rl.DisableCursor()
+
+    //Data I need:
+    //Camera - Player placement -> everything in the data will be moved according to the position of the player
+    //List of Renderables -> List of all the data needed to render a damn thing
+    //Logic loop -> things that happen when the game playes
+    game()
     return
     }
-//Basic function/method semantics
-//fnName :: proc(t1:T1, t2:T2) -> (returnType1, returnType2)
-//The return values may be named like (ret1:retT1, ret2:retT2)
-//Then the are pre-initialized and default return will return those values
+
 vector2 :: struct {
     x: f32,
     y: f32
 }
+
 bullet :: struct {
     position: vector2,
     normilizedDirection: vector2,
     speed: f32
 }
 
-gameLoop :: proc() {
-    rl.InitWindow(800,600, "odin test")
+game :: proc() {
     // defer rl.CloseWindow()
-    rl.DisableCursor()
+    playerPos: vector2 = {0,0}
     bullets: [dynamic]bullet
-    targetFps:i32
-    targetFps = 144
-    rl.SetTargetFPS(targetFps)
-    logicFps:i32
-    logicFps = 30
-    fpsPerLogic := targetFps/logicFps
-    i,x,y:i32 //This is my first int value :)
-    fpsCount:i32
-    bx,by:i32 //For bullet only
-    bulletExists:bool
-    bxv,byv:i32
     for !rl.WindowShouldClose(){
-        fpsCount +=1
-        if fpsPerLogic < fpsCount{
-            fpsCount = 0
-            i+=5
-            logic()
-        }
         if rl.IsKeyDown(rl.KeyboardKey.RIGHT) || rl.IsKeyDown(rl.KeyboardKey.D){
-            x +=2;
+            playerPos.x +=2;
         }
         if rl.IsKeyDown(rl.KeyboardKey.LEFT) || rl.IsKeyDown(rl.KeyboardKey.A){
-            x -=2;
+            playerPos.x -=2;
         }
         if rl.IsKeyDown(rl.KeyboardKey.UP) || rl.IsKeyDown(rl.KeyboardKey.W){
-            y -=2;
+            playerPos.y -=2;
         }
         if rl.IsKeyDown(rl.KeyboardKey.DOWN) || rl.IsKeyDown(rl.KeyboardKey.S){
-            y +=2;
+            playerPos.y +=2;
         }
         rl.BeginDrawing()
-        rl.ClearBackground({255,190,0,255})
-        rl.DrawRectangle(0,0,400,300,{255,255,255,255})
-        rl.DrawRectangle(400,300,400,300,{255,255,255,255})
-        for &item in bullets {
-            item.position = getChangedPosition(item)
-            rl.DrawRectangle(i32(item.position.x), i32(item.position.y), 20,20, {50,150,50,255})
-        }
-        if i < 400{
-            rl.DrawRectangle(i,i,50,50, {0,0,0,255})
-        }
-        rl.DrawRectangle(x,y,50,50, {150,0,0,255})
         {
-            rl.DrawRectangle(auto_cast rl.GetMouseX()-1, rl.GetMouseY()-10, 2, 20, {0,0,0,255})
-            rl.DrawRectangle(auto_cast rl.GetMouseX()-10, rl.GetMouseY()-1, 20, 2, {0,0,0,255})
-        }
-        if rl.IsMouseButtonPressed(rl.MouseButton.LEFT){
-            xDiff:f32 = auto_cast(rl.GetMouseX() - x)
-            yDiff:f32 = auto_cast(rl.GetMouseY() - y)
-            c :f32= math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
-            xDiff /= c
-            yDiff /= c
-            blt:bullet = {
-                {f32(x + 25), f32(y + 25)},
-                {xDiff, yDiff},
-                5
+            rl.ClearBackground({255,190,0,255})
+            //Draw player at the very end
+            defer rl.DrawRectangle(auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2),
+                            auto_cast(entitySize.x),auto_cast(entitySize.y),{0,50,255,255})
+            rl.DrawRectangle(auto_cast(0-playerPos.x),auto_cast(0-playerPos.y),400,300,{255,255,255,255})
+            rl.DrawRectangle(auto_cast(400-playerPos.x),auto_cast(300-playerPos.y),400,300,{255,255,255,255})
+            #reverse for &item, index in bullets {
+                item.position = getChangedPosition(item)
+                rl.DrawRectangle(i32(item.position.x - playerPos.x), i32(item.position.y-playerPos.y), 20,20, {50,150,50,255})
+                if item.position.x < 0 || item.position.x > 800 || item.position.y < 0 || item.position.y > 600
+                {
+                    ordered_remove(&bullets, index)
+                    fmt.println("removing bullet...")
+                    fmt.println(bullets)
+                }
             }
-            append(&bullets, blt)
+            if rl.IsMouseButtonPressed(rl.MouseButton.LEFT){
+                xDiff:f32 = auto_cast(rl.GetMouseX() - i32(windowSize.x/2))
+                yDiff:f32 = auto_cast(rl.GetMouseY() - i32(windowSize.y/2))
+                c :f32= math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
+                xDiff /= c
+                yDiff /= c
+                blt:bullet = {
+                    {f32(playerPos.x + windowSize.x/2), f32(playerPos.y  + windowSize.y/2)},
+                    {xDiff, yDiff},
+                    5
+                }
+                append(&bullets, blt)
+            }
         }
         rl.EndDrawing()
     }
