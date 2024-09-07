@@ -25,9 +25,20 @@ main :: proc() {
     //Camera - Player placement -> everything in the data will be moved according to the position of the player
     //List of Renderables -> List of all the data needed to render a damn thing
     //Logic loop -> things that happen when the game playes
+    //
+    //Procs I may need
+    //Render by player position
+    //Render (by camera position)
     game()
     return
-    }
+}
+
+color :: struct {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8
+}
 
 vector2 :: struct {
     x: f32,
@@ -40,31 +51,25 @@ bullet :: struct {
     speed: f32
 }
 
+DrawRectangleByPlayer :: proc() {
+    //For now only draws player rect but will be changed to drawing more thing if neccessary
+    rl.DrawRectangle(auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2),
+                        auto_cast(entitySize.x),auto_cast(entitySize.y),{0,50,255,255})
+}
+
 game :: proc() {
     // defer rl.CloseWindow()
     playerPos: vector2 = {0,0}
     bullets: [dynamic]bullet
     for !rl.WindowShouldClose(){
-        if rl.IsKeyDown(rl.KeyboardKey.RIGHT) || rl.IsKeyDown(rl.KeyboardKey.D){
-            playerPos.x +=2;
-        }
-        if rl.IsKeyDown(rl.KeyboardKey.LEFT) || rl.IsKeyDown(rl.KeyboardKey.A){
-            playerPos.x -=2;
-        }
-        if rl.IsKeyDown(rl.KeyboardKey.UP) || rl.IsKeyDown(rl.KeyboardKey.W){
-            playerPos.y -=2;
-        }
-        if rl.IsKeyDown(rl.KeyboardKey.DOWN) || rl.IsKeyDown(rl.KeyboardKey.S){
-            playerPos.y +=2;
-        }
+        playerPos = movementLogic(playerPos);
         rl.BeginDrawing()
         {
             rl.ClearBackground({255,190,0,255})
             //Draw player at the very end
-            defer rl.DrawRectangle(auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2),
-                            auto_cast(entitySize.x),auto_cast(entitySize.y),{0,50,255,255})
-            rl.DrawRectangle(auto_cast(0-playerPos.x),auto_cast(0-playerPos.y),400,300,{255,255,255,255})
-            rl.DrawRectangle(auto_cast(400-playerPos.x),auto_cast(300-playerPos.y),400,300,{255,255,255,255})
+            defer DrawRectangleByPlayer()
+            drawBackground(playerPos)
+
             #reverse for &item, index in bullets {
                 item.position = getChangedPosition(item)
                 rl.DrawRectangle(i32(item.position.x - playerPos.x), i32(item.position.y-playerPos.y), 20,20, {50,150,50,255})
@@ -91,6 +96,41 @@ game :: proc() {
         }
         rl.EndDrawing()
     }
+
+
+}
+drawBackground :: proc(playerPos:vector2){
+    //800x600 -> lets have 30x30 tiles so we need about 29~30 horizontally AND 22 vertically
+    tileSize:vector2 = {30,30}
+    //the -50 ~ 50 is how many tiles to render
+    //Could actually only render tiles on screen -> less draw calls
+    //Could change the for loop so that instead of using range we would use a certain amount based on window size or some constant
+    for x in -50..=50{
+        for y in -50..=50{
+            col:color = {255,255,255,55}
+            if (x+y) % 2 == 0 {
+                col = {200,200,200,255}
+            }
+            rl.DrawRectangle(auto_cast(f32(x)*tileSize.x - playerPos.x), auto_cast(f32(y)*tileSize.y - playerPos.y), auto_cast(tileSize.x), auto_cast(tileSize.y), {col.r,col.g,col.b,col.a})
+        }
+    }
+}
+
+movementLogic :: proc(playerPos:vector2) -> vector2 {
+    playerPos := playerPos
+    if rl.IsKeyDown(rl.KeyboardKey.RIGHT) || rl.IsKeyDown(rl.KeyboardKey.D){
+        playerPos.x +=2;
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.LEFT) || rl.IsKeyDown(rl.KeyboardKey.A){
+        playerPos.x -=2;
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.UP) || rl.IsKeyDown(rl.KeyboardKey.W){
+        playerPos.y -=2;
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.DOWN) || rl.IsKeyDown(rl.KeyboardKey.S){
+        playerPos.y +=2;
+    }
+    return playerPos
 }
 
 getChangedPosition :: proc{
