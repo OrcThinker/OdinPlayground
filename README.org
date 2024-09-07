@@ -1,1 +1,12 @@
-OdinPlayground
+#+title: Odin Playground
+#+description: Just a project to play around with raylib and ODIN programming language to see if it's pleasurable
+
+* Checking how org files are displayed in git
+** Checking how org files are displayed in git
+*** Checking how org files are displayed in git
+**** Checking how org files are displayed in git
+***** Checking how org files are displayed in git
+*** TODO Checking how org files are displayed in git
+*** PROJ Checking how org files are displayed in git
+*** LOOP Checking how org files are displayed in git
+* STRT Checking how org files are displayed in git
