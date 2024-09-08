@@ -51,16 +51,32 @@ bullet :: struct {
     speed: f32
 }
 
+character :: struct {
+    position: vector2,
+    speed: f32,
+    health: i32
+}
+
 DrawRectangleByPlayer :: proc() {
     //For now only draws player rect but will be changed to drawing more thing if neccessary
     rl.DrawRectangle(auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2),
                         auto_cast(entitySize.x),auto_cast(entitySize.y),{0,50,255,255})
 }
 
+DrawRectangleOnMap :: proc(pos:vector2, playerPos:vector2, size:vector2, col:color = {255,35,35,255}) {
+    rl.DrawRectangle(auto_cast(pos.x-playerPos.x),auto_cast(pos.y-playerPos.y),i32(size.x),i32(size.y), {col.r,col.g,col.b,col.a})
+}
+
 game :: proc() {
     // defer rl.CloseWindow()
-    playerPos: vector2 = {0,0}
+    playerPos: vector2 = {windowSize.x/2, windowSize.y/2}
+    initPlayerPos: vector2 = {windowSize.x/2, windowSize.y/2}
     bullets: [dynamic]bullet
+    enemies: [dynamic]character
+    for i in 0..<3{
+        enemy:character = {{600,300 + f32(i*200)}, 1, 30}
+        append(&enemies, enemy)
+    }
     for !rl.WindowShouldClose(){
         playerPos = movementLogic(playerPos);
         rl.BeginDrawing()
@@ -80,6 +96,19 @@ game :: proc() {
                     fmt.println(bullets)
                 }
             }
+
+            #reverse for &enemy, index in enemies {
+                xDiff:f32 = playerPos.x - enemy.position.x
+                yDiff:f32 = playerPos.y - enemy.position.y
+                c := math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
+                change :=  vector2_getChangedPosition(enemy.position, {xDiff/c, yDiff/c}, enemy.speed)
+                toPrint :vector2 = {enemy.position.x - change.x, enemy.position.y - change.y}
+                fmt.println(toPrint)
+                enemy.position = change
+                playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
+                DrawRectangleOnMap(enemy.position, playerPosWithoutOffset, {30,60})
+            }
+
             if rl.IsMouseButtonPressed(rl.MouseButton.LEFT){
                 xDiff:f32 = auto_cast(rl.GetMouseX() - i32(windowSize.x/2))
                 yDiff:f32 = auto_cast(rl.GetMouseY() - i32(windowSize.y/2))
@@ -145,5 +174,3 @@ vector2_getChangedPosition :: proc(pos:vector2, dir:vector2, speed:f32) -> (newP
     newPos = {pos.x + posChange.x, pos.y + posChange.y}
     return
 }
-
-logic :: proc() {}

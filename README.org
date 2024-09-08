@@ -3,6 +3,9 @@
 
 * Just trying to write some simple game-like features in Odin with raylib
 It's my first try at odin. So far language feels pretty noice so I decided to give building something a go
+** Important TODOs for a project
+*** Remove .exe file
+*** Split project into smaller files
 ** Features
 There are few things I think my be cool to try to implement
 *** Player movement (moreso camera movement)
