@@ -89,7 +89,7 @@ game :: proc() {
             #reverse for &item, index in bullets {
                 item.position = getChangedPosition(item)
                 playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
-                DrawRectangleOnMap(item.position, playerPosWithoutOffset, {15,15}, {50,150,50,255} )
+                DrawRectangleOnMap(item.position, playerPosWithoutOffset, {14,14}, {50,150,50,255} )
                 if item.position.x < -1000 || item.position.x > 2000 || item.position.y < -1000 || item.position.y > 2000
                 {
                     ordered_remove(&bullets, index)
@@ -102,8 +102,8 @@ game :: proc() {
                     fmt.println(enemy.position)
                     //Wrong colission calculation
                     //Possibly need to take bullet size into account
-                    if math.abs(item.position.x - enemy.position.x - entitySize.x/2) <= entitySize.x/2 + 15 &&
-                        math.abs(item.position.y - enemy.position.y - entitySize.y/2) <= entitySize.y/2 + 15
+                    if math.abs(item.position.x - enemy.position.x - entitySize.x/2 + 14) <= entitySize.x/2  &&
+                        math.abs(item.position.y - enemy.position.y - entitySize.y/2 + 7) <= entitySize.y/2 + 7
                     {
                         fmt.println("collision")
                         ordered_remove(&bullets, index)
