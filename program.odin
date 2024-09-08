@@ -73,7 +73,7 @@ game :: proc() {
     initPlayerPos: vector2 = {windowSize.x/2, windowSize.y/2}
     bullets: [dynamic]bullet
     enemies: [dynamic]character
-    for i in 0..<3{
+    for i in 0..<1{
         enemy:character = {{600,300 + f32(i*200)}, 1, 30}
         append(&enemies, enemy)
     }
@@ -88,23 +88,39 @@ game :: proc() {
 
             #reverse for &item, index in bullets {
                 item.position = getChangedPosition(item)
-                rl.DrawRectangle(i32(item.position.x - playerPos.x), i32(item.position.y-playerPos.y), 20,20, {50,150,50,255})
-                if item.position.x < 0 || item.position.x > 800 || item.position.y < 0 || item.position.y > 600
+                playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
+                DrawRectangleOnMap(item.position, playerPosWithoutOffset, {15,15}, {50,150,50,255} )
+                if item.position.x < -1000 || item.position.x > 2000 || item.position.y < -1000 || item.position.y > 2000
                 {
                     ordered_remove(&bullets, index)
-                    fmt.println("removing bullet...")
-                    fmt.println(bullets)
+                }
+                #reverse for &enemy, eIndex in enemies {
+                    toPrint := item.position.x - enemy.position.x
+                    fmt.println("item")
+                    fmt.println(item.position)
+                    fmt.println("enemy")
+                    fmt.println(enemy.position)
+                    //Wrong colission calculation
+                    //Possibly need to take bullet size into account
+                    if math.abs(item.position.x - enemy.position.x - entitySize.x/2) <= entitySize.x/2 + 15 &&
+                        math.abs(item.position.y - enemy.position.y - entitySize.y/2) <= entitySize.y/2 + 15
+                    {
+                        fmt.println("collision")
+                        ordered_remove(&bullets, index)
+                    }
                 }
             }
 
+            if len(enemies) == 0{
+                enemy:character = {{600,300}, 1, 30}
+                append(&enemies, enemy)
+            }
             #reverse for &enemy, index in enemies {
                 xDiff:f32 = playerPos.x - enemy.position.x
                 yDiff:f32 = playerPos.y - enemy.position.y
                 c := math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
                 change :=  vector2_getChangedPosition(enemy.position, {xDiff/c, yDiff/c}, enemy.speed)
-                toPrint :vector2 = {enemy.position.x - change.x, enemy.position.y - change.y}
-                fmt.println(toPrint)
-                enemy.position = change
+                // enemy.position = change
                 playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
                 DrawRectangleOnMap(enemy.position, playerPosWithoutOffset, {30,60})
             }
@@ -115,8 +131,9 @@ game :: proc() {
                 c :f32= math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
                 xDiff /= c
                 yDiff /= c
+                playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
                 blt:bullet = {
-                    {f32(playerPos.x + windowSize.x/2), f32(playerPos.y  + windowSize.y/2)},
+                    {f32(playerPosWithoutOffset.x + windowSize.x/2), f32(playerPosWithoutOffset.y  + windowSize.y/2)},
                     {xDiff, yDiff},
                     5
                 }
@@ -128,6 +145,7 @@ game :: proc() {
 
 
 }
+
 drawBackground :: proc(playerPos:vector2){
     //800x600 -> lets have 30x30 tiles so we need about 29~30 horizontally AND 22 vertically
     tileSize:vector2 = {30,30}
