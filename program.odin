@@ -2,7 +2,9 @@ package main
 
 import "core:fmt"
 import "core:math"
+import "core:math/rand"
 import "core:slice"
+import "core:time"
 import rl "vendor:raylib"
 import b2 "vendor:box2d"
 
@@ -96,23 +98,22 @@ game :: proc() {
                 }
                 #reverse for &enemy, eIndex in enemies {
                     toPrint := item.position.x - enemy.position.x
-                    fmt.println("item")
-                    fmt.println(item.position)
-                    fmt.println("enemy")
-                    fmt.println(enemy.position)
-                    //Wrong colission calculation
-                    //Possibly need to take bullet size into account
                     if math.abs(item.position.x - enemy.position.x - entitySize.x/2 + 14) <= entitySize.x/2  &&
                         math.abs(item.position.y - enemy.position.y - entitySize.y/2 + 7) <= entitySize.y/2 + 7
                     {
-                        fmt.println("collision")
                         ordered_remove(&bullets, index)
+                        enemy.health -=10
+                        if enemy.health <= 0
+                        {
+                            ordered_remove(&enemies, eIndex)
+                        }
                     }
                 }
             }
 
             if len(enemies) == 0{
-                enemy:character = {{600,300}, 1, 30}
+                newEnemyPosition :vector2= {f32(rand.int31_max(8)*100), f32(rand.int31_max(5) * 100)}
+                enemy:character = {newEnemyPosition, 1, 30}
                 append(&enemies, enemy)
             }
             #reverse for &enemy, index in enemies {
@@ -120,7 +121,7 @@ game :: proc() {
                 yDiff:f32 = playerPos.y - enemy.position.y
                 c := math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
                 change :=  vector2_getChangedPosition(enemy.position, {xDiff/c, yDiff/c}, enemy.speed)
-                // enemy.position = change
+                enemy.position = change
                 playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
                 DrawRectangleOnMap(enemy.position, playerPosWithoutOffset, {30,60})
             }
