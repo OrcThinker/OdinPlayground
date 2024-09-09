@@ -162,21 +162,34 @@ drawBackground :: proc(playerPos:vector2){
             rl.DrawRectangle(auto_cast(f32(x)*tileSize.x - playerPos.x), auto_cast(f32(y)*tileSize.y - playerPos.y), auto_cast(tileSize.x), auto_cast(tileSize.y), {col.r,col.g,col.b,col.a})
         }
     }
+    rl.DrawRectangleLines(-50 - i32(playerPos.x),-50 - i32(playerPos.y),1500,1500, {0,0,0,255})
 }
 
 movementLogic :: proc(playerPos:vector2) -> vector2 {
     playerPos := playerPos
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) || rl.IsKeyDown(rl.KeyboardKey.D){
-        playerPos.x +=2;
+        playerPos.x +=2
+        if playerPos.x > 1500-50-windowSize.x/2-entitySize.x/2{
+            playerPos.x -=2
+        }
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) || rl.IsKeyDown(rl.KeyboardKey.A){
         playerPos.x -=2;
+        if playerPos.x < -50-windowSize.x/2+entitySize.x/2 {
+            playerPos.x +=2
+        }
     }
     if rl.IsKeyDown(rl.KeyboardKey.UP) || rl.IsKeyDown(rl.KeyboardKey.W){
         playerPos.y -=2;
+        if playerPos.y < -50-windowSize.y/2+entitySize.y/2 {
+            playerPos.y +=2
+        }
     }
     if rl.IsKeyDown(rl.KeyboardKey.DOWN) || rl.IsKeyDown(rl.KeyboardKey.S){
         playerPos.y +=2;
+        if playerPos.y > 1500-50-windowSize.y/2-entitySize.y/2{
+            playerPos.y -=2
+        }
     }
     return playerPos
 }
