@@ -4,6 +4,7 @@
 * Just trying to write some simple game-like features in Odin with raylib
 It's my first try at odin. So far language feels pretty noice so I decided to give building something a go
 Overall the project will be just mashing things until they work. There is alot of math that has not been tought through. I am just coding Odin to get a hang of it and verify if I'd like to try to code something bigger in it
+It's pretty cool in that way that you can just download .exe and run it to play
 ** Important TODOs for a project
 *** Remove .exe file
 *** Split project into smaller files

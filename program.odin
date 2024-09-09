@@ -92,9 +92,9 @@ game :: proc() {
             rl.ClearBackground({255,190,0,255})
             //Draw player at the very end
             defer DrawRectangleByPlayer()
-            levelText:cstring = strings.clone_to_cstring(fmt.aprintf("Level: %v", Level))
+            levelText:cstring = fmt.ctprintf("Level: %v", Level)
             defer rl.DrawText(cstring(levelText), 20,20, 32, {0,0,0,255})
-            enemiesLeftText:cstring = strings.clone_to_cstring(fmt.aprintf("Enemies left: %v", EnemiesLeft))
+            enemiesLeftText:cstring = fmt.ctprintf("Enemies left: %v", EnemiesLeft)
             defer rl.DrawText(enemiesLeftText, 20,60, 32, {0,0,0,255})
             drawBackground(playerPos)
 
@@ -127,9 +127,7 @@ game :: proc() {
 
             if nextLevelDoorOpen {
                 DrawRectangleOnMap({500,300}, {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}, {80,80},{50,255,50,255})
-                    fmt.println(playerPos)
                 if playerPos.x > 500 && playerPos.x < 580 && playerPos.y > 300 && playerPos.y < 380{
-                    fmt.printf("next level")
                     nextLevelDoorOpen = false
                     playerPos = initPlayerPos
                     Level += 1
