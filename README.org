@@ -3,6 +3,7 @@
 
 * Just trying to write some simple game-like features in Odin with raylib
 It's my first try at odin. So far language feels pretty noice so I decided to give building something a go
+Overall the project will be just mashing things until they work. There is alot of math that has not been tought through. I am just coding Odin to get a hang of it and verify if I'd like to try to code something bigger in it
 ** Important TODOs for a project
 *** Remove .exe file
 *** Split project into smaller files
@@ -17,15 +18,18 @@ Once I add some entites / enemies. Bullet collision with a target and target loo
 Just some basic entities that will chase you so there is a game. Dmg on touch nothing special. Maybe varying movement, health, damage
 *** Movement collision / walls
 For sure limiting a place where a player can move. Maybe adding walls which players cannot pass (this is kinda nasty in a way becouse it will require an implementation of a pathfinding algo for enemies)
+*** Multiple floors
+Just added a "portal" when you finish the level aka kill all "Enemies left"
+Each level is just 1 more enemy to kill
+*** Walls
+Drew black borders and disallowed player to move outside of bounds in a janky way
 
 ** Out of scope features (for now)
 *** Item pickups
-*** Walls
 *** Pathfinding
 *** UI
 *** Boss fight
 *** Textures
 *** Sound
-*** Multiple floors
 *** NPCs (between floors)
 *** Shop (between floors)

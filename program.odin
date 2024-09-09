@@ -7,6 +7,7 @@ import "core:slice"
 import "core:time"
 import rl "vendor:raylib"
 import b2 "vendor:box2d"
+import "core:strings"
 
 
 targetFps:i32: 144
@@ -69,16 +70,21 @@ DrawRectangleOnMap :: proc(pos:vector2, playerPos:vector2, size:vector2, col:col
     rl.DrawRectangle(auto_cast(pos.x-playerPos.x),auto_cast(pos.y-playerPos.y),i32(size.x),i32(size.y), {col.r,col.g,col.b,col.a})
 }
 
+Level:=0
+EnemiesLeft:=0
+
 game :: proc() {
     // defer rl.CloseWindow()
     playerPos: vector2 = {windowSize.x/2, windowSize.y/2}
     initPlayerPos: vector2 = {windowSize.x/2, windowSize.y/2}
+    nextLevelDoorOpen := false
     bullets: [dynamic]bullet
     enemies: [dynamic]character
-    for i in 0..<1{
-        enemy:character = {{600,300 + f32(i*200)}, 1, 30}
-        append(&enemies, enemy)
-    }
+    EnemiesLeft = 5
+    // for i in 0..<1{
+    //     enemy:character = {{600,300 + f32(i*200)}, 1, 30}
+    //     append(&enemies, enemy)
+    // }
     for !rl.WindowShouldClose(){
         playerPos = movementLogic(playerPos);
         rl.BeginDrawing()
@@ -86,6 +92,10 @@ game :: proc() {
             rl.ClearBackground({255,190,0,255})
             //Draw player at the very end
             defer DrawRectangleByPlayer()
+            levelText:cstring = strings.clone_to_cstring(fmt.aprintf("Level: %v", Level))
+            defer rl.DrawText(cstring(levelText), 20,20, 32, {0,0,0,255})
+            enemiesLeftText:cstring = strings.clone_to_cstring(fmt.aprintf("Enemies left: %v", EnemiesLeft))
+            defer rl.DrawText(enemiesLeftText, 20,60, 32, {0,0,0,255})
             drawBackground(playerPos)
 
             #reverse for &item, index in bullets {
@@ -106,12 +116,28 @@ game :: proc() {
                         if enemy.health <= 0
                         {
                             ordered_remove(&enemies, eIndex)
+                            EnemiesLeft -=1
+                            if EnemiesLeft == 0{
+                                nextLevelDoorOpen = true
+                            }
                         }
                     }
                 }
             }
 
-            if len(enemies) == 0{
+            if nextLevelDoorOpen {
+                DrawRectangleOnMap({500,300}, {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}, {80,80},{50,255,50,255})
+                    fmt.println(playerPos)
+                if playerPos.x > 500 && playerPos.x < 580 && playerPos.y > 300 && playerPos.y < 380{
+                    fmt.printf("next level")
+                    nextLevelDoorOpen = false
+                    playerPos = initPlayerPos
+                    Level += 1
+                    EnemiesLeft = 5 + Level
+                }
+            }
+
+            if len(enemies) == 0 && EnemiesLeft > 0{
                 newEnemyPosition :vector2= {f32(rand.int31_max(8)*100), f32(rand.int31_max(5) * 100)}
                 enemy:character = {newEnemyPosition, 1, 30}
                 append(&enemies, enemy)
