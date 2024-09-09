@@ -136,7 +136,7 @@ game :: proc() {
             }
 
             if len(enemies) == 0 && EnemiesLeft > 0{
-                newEnemyPosition :vector2= {f32(rand.int31_max(8)*100), f32(rand.int31_max(5) * 100)}
+                newEnemyPosition :vector2= {f32(rand.int31_max(8)*50 + 100), f32(rand.int31_max(5) * 50 + 100)}
                 enemy:character = {newEnemyPosition, 1, 30}
                 append(&enemies, enemy)
             }
