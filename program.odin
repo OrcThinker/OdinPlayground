@@ -60,6 +60,12 @@ character :: struct {
     health: i32
 }
 
+triangle :: struct {
+    a: rl.Vector2,
+    b: rl.Vector2,
+    c: rl.Vector2,
+}
+
 DrawRectangleByPlayer :: proc() {
     //For now only draws player rect but will be changed to drawing more thing if neccessary
     rl.DrawRectangle(auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2),
@@ -73,6 +79,25 @@ DrawRectangleOnMap :: proc(pos:vector2, playerPos:vector2, size:vector2, col:col
 Level:=0
 EnemiesLeft:=0
 
+getVisionTriangle :: proc(tri1,tri2,tri3:rl.Vector2, additionalRotation:f32 = 0) -> triangle {
+    //Try drawing triangles
+    tri1 := tri1
+    tri2 := tri2
+    tri3 := tri3
+    pointAngle := rl.Vector2Angle({0,-1000}, {f32(rl.GetMouseX()) - windowSize.x/2, f32(rl.GetMouseY()) - windowSize.y/2})
+    if rl.GetMouseX() <= i32(windowSize.x/2) {
+        pointAngle *= -1
+    }
+    tri1 = rl.Vector2Rotate({tri1.x, tri1.y}, pointAngle + additionalRotation)
+    tri2 = rl.Vector2Rotate({tri2.x, tri2.y}, pointAngle + additionalRotation)
+    tri3 = rl.Vector2Rotate({tri3.x, tri3.y}, pointAngle + additionalRotation)
+    tri1 += {windowSize.x/2, windowSize.y/2}
+    tri2 += {windowSize.x/2, windowSize.y/2}
+    tri3 += {windowSize.x/2, windowSize.y/2}
+    visionTriangle:triangle = {tri1,tri2,tri3}
+    return visionTriangle
+}
+
 game :: proc() {
     // defer rl.CloseWindow()
     playerPos: vector2 = {windowSize.x/2, windowSize.y/2}
@@ -81,6 +106,7 @@ game :: proc() {
     bullets: [dynamic]bullet
     enemies: [dynamic]character
     EnemiesLeft = 5
+    VisionTri: triangle
     // for i in 0..<1{
     //     enemy:character = {{600,300 + f32(i*200)}, 1, 30}
     //     append(&enemies, enemy)
@@ -92,6 +118,22 @@ game :: proc() {
             rl.ClearBackground({255,190,0,255})
             //Draw player at the very end
             defer DrawRectangleByPlayer()
+
+            triHeight := math.sqrt(math.pow(windowSize.x,2) + math.pow(windowSize.y,2))/2
+            VisionTri = getVisionTriangle({0,0}, {windowSize.x/2, -triHeight}, {-windowSize.x, -triHeight})
+            blockTri:triangle = getVisionTriangle({0,0}, {triHeight, triHeight}, {triHeight, -triHeight})
+            blockTri2:triangle = getVisionTriangle({0,0},{-triHeight, -triHeight}, {-triHeight, triHeight})
+            blockTri3:triangle = getVisionTriangle({0,0},{-triHeight, triHeight}, {triHeight, triHeight} )
+            defer {
+                flashLightCol :rl.Color= {255,255,255,50}
+                blackoutCol:rl.Color = {0,0,0,240}
+                rl.DrawTriangle(VisionTri.a, VisionTri.b, VisionTri.c, flashLightCol)
+                rl.DrawTriangle(blockTri.a, blockTri.b, blockTri.c, blackoutCol)
+                rl.DrawTriangle(blockTri2.a, blockTri2.b, blockTri2.c, blackoutCol)
+                rl.DrawTriangle(blockTri3.a, blockTri3.b, blockTri3.c, blackoutCol)
+            }
+
+
             levelText:cstring = fmt.ctprintf("Level: %v", Level)
             defer rl.DrawText(cstring(levelText), 20,20, 32, {0,0,0,255})
             enemiesLeftText:cstring = fmt.ctprintf("Enemies left: %v", EnemiesLeft)
