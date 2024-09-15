@@ -8,31 +8,39 @@ import "core:time"
 import rl "vendor:raylib"
 import b2 "vendor:box2d"
 import "core:strings"
+import "core:log"
+import "core:mem"
 
 
 targetFps:i32: 144
 windowSize:vector2: {800,600}
 entitySize:vector2: {40,60}
 
-// getMiddle :: proc() -> vector2{
-//     return {windowSize.x/2, windowSize.y/2}
-// }
-
 main :: proc() {
 	fmt.println("Hellope!")
     rl.InitWindow(auto_cast(windowSize.x), auto_cast(windowSize.y), "odin test")
     rl.SetTargetFPS(targetFps)
     // rl.DisableCursor()
+    context.logger = log.create_console_logger()
 
-    //Data I need:
-    //Camera - Player placement -> everything in the data will be moved according to the position of the player
-    //List of Renderables -> List of all the data needed to render a damn thing
-    //Logic loop -> things that happen when the game playes
-    //
-    //Procs I may need
-    //Render by player position
-    //Render (by camera position)
+    default_allocator := context.allocator
+    tracking_allocator: mem.Tracking_Allocator
+    mem.tracking_allocator_init(&tracking_allocator, default_allocator)
+    context.allocator = mem.tracking_allocator(&tracking_allocator)
+
+    reset_tracking_allocator :: proc(a: ^mem.Tracking_Allocator) -> bool {
+        err := false
+
+        for _, value in a.allocation_map {
+            fmt.printf("%v: Leaked %v bytes\n", value.location, value.size)
+            err = true
+        }
+
+        mem.tracking_allocator_clear(a)
+        return err
+    }
     game()
+    reset_tracking_allocator(&tracking_allocator)
     return
 }
 
@@ -111,13 +119,30 @@ game :: proc() {
     //     enemy:character = {{600,300 + f32(i*200)}, 1, 30}
     //     append(&enemies, enemy)
     // }
+    playerImg: rl.Texture2D = rl.LoadTexture("./animTexture.png")
+    frameRec: rl.Rectangle = {0, 0, f32(playerImg.width), f32(playerImg.height/4)}
+    currentFrame,framesCounter,framesSpeed:i32 = 0,0,8
+
     for !rl.WindowShouldClose(){
         playerPos = movementLogic(playerPos);
         rl.BeginDrawing()
         {
             rl.ClearBackground({255,190,0,255})
+
+            framesCounter +=1
+
+            if framesCounter >= targetFps/framesSpeed {
+                framesCounter = 0
+                currentFrame += 1
+                if currentFrame > 3 {
+                    currentFrame = 0
+                }
+                frameRec.y = f32(currentFrame*playerImg.height)/4
+            }
+
             //Draw player at the very end
-            defer DrawRectangleByPlayer()
+            // defer DrawRectangleByPlayer()
+            defer rl.DrawTextureRec(playerImg,frameRec, {auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2)}, rl.WHITE)
 
             triHeight := math.sqrt(math.pow(windowSize.x,2) + math.pow(windowSize.y,2))/2
             VisionTri = getVisionTriangle({0,0}, {windowSize.x/2, -triHeight}, {-windowSize.x, -triHeight})
@@ -209,6 +234,7 @@ game :: proc() {
         }
         rl.EndDrawing()
     }
+
 
 
 }

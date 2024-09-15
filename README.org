@@ -5,6 +5,8 @@
 It's my first try at odin. So far language feels pretty noice so I decided to give building something a go
 Overall the project will be just mashing things until they work. There is alot of math that has not been tought through. I am just coding Odin to get a hang of it and verify if I'd like to try to code something bigger in it
 It's pretty cool in that way that you can just download .exe and run it to play
+
+Most likely will have to rewrite the entire project now that I have a semblance of how to use ODIN lang to add it a bit more structure but also to fix math. It will be either done inside this project or in an entirely new one
 ** Important TODOs for a project
 *** Remove .exe file
 *** Split project into smaller files
@@ -24,13 +26,14 @@ Just added a "portal" when you finish the level aka kill all "Enemies left"
 Each level is just 1 more enemy to kill
 *** Walls
 Drew black borders and disallowed player to move outside of bounds in a janky way
+*** Textures
+Drawing 1~4 number from .png on a player texture to have some "animation"
 
 ** Out of scope features (for now)
 *** Item pickups
 *** Pathfinding
 *** UI
 *** Boss fight
-*** Textures
 *** Sound
 *** NPCs (between floors)
 *** Shop (between floors)
