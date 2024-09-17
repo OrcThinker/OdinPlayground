@@ -28,15 +28,6 @@ Drawing 1~4 number from .png on a player texture to have some "animation"
 *** Lose condition
 Player has hp and when it reaches 0 they lose, the game shows "you lose" screen and soon after the game exits
 
-** Out of scope features (those will not be included in the project)
-*** Item pickups
-*** Pathfinding
-*** UI
-*** Boss fight
-*** Sound
-*** NPCs (between floors)
-*** Shop (between floors)
-
 ** Known bugs
 *** At one point math went wrong, didn't bother to fix it so it won't work correctly if played on diffrent resolution than 800x600
 *** Enemy may spawn in such a way that they won't exist thus making progression impossible
