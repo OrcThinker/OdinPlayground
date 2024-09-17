@@ -80,7 +80,8 @@ DrawRectangleByPlayer :: proc() {
                         auto_cast(entitySize.x),auto_cast(entitySize.y),{0,50,255,255})
 }
 
-DrawRectangleOnMap :: proc(pos:vector2, playerPos:vector2, size:vector2, col:color = {255,35,35,255}) {
+//Only used for drawing enemies for now
+DrawRectangleOnMap :: proc(pos:vector2, playerPos:vector2, size:vector2, col:color = {130,35,35,255}) {
     rl.DrawRectangle(auto_cast(pos.x-playerPos.x),auto_cast(pos.y-playerPos.y),i32(size.x),i32(size.y), {col.r,col.g,col.b,col.a})
 }
 
@@ -106,30 +107,40 @@ getVisionTriangle :: proc(tri1,tri2,tri3:rl.Vector2, additionalRotation:f32 = 0)
     return visionTriangle
 }
 
+drawCrosshair :: proc(playerPos:vector2) {
+    mousePos:= rl.GetMousePosition()
+    crosshairSize :i32= 21
+    rl.DrawRectangle(i32(mousePos.x) - crosshairSize/2, i32(mousePos.y), crosshairSize,1, {0,0,0,255})
+    rl.DrawRectangle(i32(mousePos.x), i32(mousePos.y) - crosshairSize/2, 1,crosshairSize, {0,0,0,255})
+}
+
 game :: proc() {
-    // defer rl.CloseWindow()
+    defer rl.CloseWindow()
     playerPos: vector2 = {windowSize.x/2, windowSize.y/2}
+    playerHp:= 50
     initPlayerPos: vector2 = {windowSize.x/2, windowSize.y/2}
     nextLevelDoorOpen := false
     bullets: [dynamic]bullet
+    defer delete(bullets)
     enemies: [dynamic]character
+    defer delete(enemies)
     EnemiesLeft = 5
     VisionTri: triangle
-    // for i in 0..<1{
-    //     enemy:character = {{600,300 + f32(i*200)}, 1, 30}
-    //     append(&enemies, enemy)
-    // }
-    playerImg: rl.Texture2D = rl.LoadTexture("./animTexture.png")
+    playerImg: rl.Texture2D = rl.LoadTexture("./baseCharacter.png")
     frameRec: rl.Rectangle = {0, 0, f32(playerImg.width), f32(playerImg.height/4)}
     currentFrame,framesCounter,framesSpeed:i32 = 0,0,8
+    inviCounter, inviSpeed:i32 = 0,16
+    exitTime :f64 = 0
 
     for !rl.WindowShouldClose(){
         playerPos = movementLogic(playerPos);
         rl.BeginDrawing()
+        if playerHp > 0
         {
             rl.ClearBackground({255,190,0,255})
 
             framesCounter +=1
+            inviCounter +=1
 
             if framesCounter >= targetFps/framesSpeed {
                 framesCounter = 0
@@ -142,6 +153,7 @@ game :: proc() {
 
             //Draw player at the very end
             // defer DrawRectangleByPlayer()
+            defer drawCrosshair(playerPos)
             defer rl.DrawTextureRec(playerImg,frameRec, {auto_cast(windowSize.x/2 - entitySize.x/2), auto_cast(windowSize.y/2 - entitySize.y/2)}, rl.WHITE)
 
             triHeight := math.sqrt(math.pow(windowSize.x,2) + math.pow(windowSize.y,2))/2
@@ -158,11 +170,12 @@ game :: proc() {
                 rl.DrawTriangle(blockTri3.a, blockTri3.b, blockTri3.c, blackoutCol)
             }
 
-
+            hpText:cstring = fmt.ctprintf("HP: %v", playerHp)
+            defer rl.DrawText(hpText, 20,20, 32, {0,0,0,255})
             levelText:cstring = fmt.ctprintf("Level: %v", Level)
-            defer rl.DrawText(cstring(levelText), 20,20, 32, {0,0,0,255})
+            defer rl.DrawText(cstring(levelText), 20,60, 32, {0,0,0,255})
             enemiesLeftText:cstring = fmt.ctprintf("Enemies left: %v", EnemiesLeft)
-            defer rl.DrawText(enemiesLeftText, 20,60, 32, {0,0,0,255})
+            defer rl.DrawText(enemiesLeftText, 20,100, 32, {0,0,0,255})
             drawBackground(playerPos)
 
             #reverse for &item, index in bullets {
@@ -207,11 +220,20 @@ game :: proc() {
                 enemy:character = {newEnemyPosition, 1, 30}
                 append(&enemies, enemy)
             }
+
             #reverse for &enemy, index in enemies {
                 xDiff:f32 = playerPos.x - enemy.position.x
                 yDiff:f32 = playerPos.y - enemy.position.y
                 c := math.sqrt(math.pow(xDiff,2) + math.pow(yDiff,2))
                 change :=  vector2_getChangedPosition(enemy.position, {xDiff/c, yDiff/c}, enemy.speed)
+                if math.abs(enemy.position.x - playerPos.x) < 10 &&
+                    math.abs(enemy.position.y - playerPos.y) < 10 &&
+                    inviCounter >= targetFps/inviSpeed {
+                    inviCounter = 0
+                    fmt.println("damage")
+                    playerHp-=1
+                    change = enemy.position
+                }
                 enemy.position = change
                 playerPosWithoutOffset :vector2= {playerPos.x - initPlayerPos.x, playerPos.y - initPlayerPos.y}
                 DrawRectangleOnMap(enemy.position, playerPosWithoutOffset, {30,60})
@@ -233,6 +255,18 @@ game :: proc() {
             }
         }
         rl.EndDrawing()
+
+        if playerHp <= 0 {
+            if exitTime == 0
+            {
+                exitTime = rl.GetTime()
+            }
+            rl.ClearBackground({255,190,0,255})
+            rl.DrawText("You lost", 20, 340, 64, rl.BLACK)
+            if rl.GetTime() - exitTime > 2{
+                rl.CloseWindow()
+            }
+        }
     }
 
 
