@@ -115,6 +115,7 @@ drawCrosshair :: proc(playerPos:vector2) {
 }
 
 game :: proc() {
+    playerMovesLeft: bool
     defer rl.CloseWindow()
     playerPos: vector2 = {windowSize.x/2, windowSize.y/2}
     playerHp:= 50
@@ -133,7 +134,7 @@ game :: proc() {
     exitTime :f64 = 0
 
     for !rl.WindowShouldClose(){
-        playerPos = movementLogic(playerPos);
+        playerPos,playerMovesLeft = movementLogic(playerPos, playerMovesLeft);
         rl.BeginDrawing()
         if playerHp > 0
         {
@@ -149,6 +150,14 @@ game :: proc() {
                     currentFrame = 0
                 }
                 frameRec.y = f32(currentFrame*playerImg.height)/4
+            }
+
+            if playerMovesLeft == true {
+                fmt.println("movesLeft")
+                frameRec.width = math.abs(frameRec.width)* -1
+            }
+            else {
+                frameRec.width = math.abs(frameRec.width)
             }
 
             //Draw player at the very end
@@ -291,15 +300,18 @@ drawBackground :: proc(playerPos:vector2){
     rl.DrawRectangleLines(-50 - i32(playerPos.x),-50 - i32(playerPos.y),1500,1500, {0,0,0,255})
 }
 
-movementLogic :: proc(playerPos:vector2) -> vector2 {
+movementLogic :: proc(playerPos:vector2, playerMovesLeft:bool) -> (vector2, bool) {
+    playerMovesLeft := playerMovesLeft
     playerPos := playerPos
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) || rl.IsKeyDown(rl.KeyboardKey.D){
+        playerMovesLeft = false
         playerPos.x +=2
         if playerPos.x > 1500-50-windowSize.x/2-entitySize.x/2{
             playerPos.x -=2
         }
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) || rl.IsKeyDown(rl.KeyboardKey.A){
+        playerMovesLeft = true
         playerPos.x -=2;
         if playerPos.x < -50-windowSize.x/2+entitySize.x/2 {
             playerPos.x +=2
@@ -317,7 +329,7 @@ movementLogic :: proc(playerPos:vector2) -> vector2 {
             playerPos.y -=2
         }
     }
-    return playerPos
+    return playerPos, playerMovesLeft
 }
 
 getChangedPosition :: proc{

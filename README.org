@@ -7,9 +7,6 @@ Overall the project will be just mashing things until they work. There is alot o
 It's pretty cool in that way that you can just download .exe and run it to play
 
 Most likely will have to rewrite the entire project now that I have a semblance of how to use ODIN lang to add it a bit more structure but also to fix math. It will be either done inside this project or in an entirely new one
-** Important TODOs for a project
-*** Remove .exe file
-*** Split project into smaller files
 ** Features
 There are few things I think my be cool to try to implement
 *** Player movement (moreso camera movement)
@@ -28,8 +25,10 @@ Each level is just 1 more enemy to kill
 Drew black borders and disallowed player to move outside of bounds in a janky way
 *** Textures
 Drawing 1~4 number from .png on a player texture to have some "animation"
+*** Lose condition
+Player has hp and when it reaches 0 they lose, the game shows "you lose" screen and soon after the game exits
 
-** Out of scope features (for now)
+** Out of scope features (those will not be included in the project)
 *** Item pickups
 *** Pathfinding
 *** UI
@@ -37,3 +36,16 @@ Drawing 1~4 number from .png on a player texture to have some "animation"
 *** Sound
 *** NPCs (between floors)
 *** Shop (between floors)
+
+** Known bugs
+*** At one point math went wrong, didn't bother to fix it so it won't work correctly if played on diffrent resolution than 800x600
+*** Enemy may spawn in such a way that they won't exist thus making progression impossible
+
+* Summary
+I would consider this project a success. I've seen the following:
+- string manipulation
+- raylibs rendering for: shapes, text and textures
+- odin memory tracking allocator
+- basic odinlang syntax
+- odinlang random values
+- odinlang math lib
