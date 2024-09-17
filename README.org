@@ -29,8 +29,8 @@ Drawing 1~4 number from .png on a player texture to have some "animation"
 Player has hp and when it reaches 0 they lose, the game shows "you lose" screen and soon after the game exits
 
 ** Known bugs
-*** At one point math went wrong, didn't bother to fix it so it won't work correctly if played on diffrent resolution than 800x600
-*** Enemy may spawn in such a way that they won't exist thus making progression impossible
+- At one point math went wrong, didn't bother to fix it so it won't work correctly if played on diffrent resolution than 800x600
+- Enemy may spawn in such a way that they won't exist thus making progression impossible
 
 * Summary
 I would consider this project a success. I've seen the following:
